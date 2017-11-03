@@ -51,7 +51,8 @@ public class FlickrFetchr {
 
     public void fetchItems() {
         try {
-            String url = Uri.parse(ENDPOINT).buildUpon()
+            String url = Uri.parse(ENDPOINT)
+                    .buildUpon()
                     .appendQueryParameter("method", METHOD_GET)
                     .appendQueryParameter("api_key", API_KEY)
                     .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
