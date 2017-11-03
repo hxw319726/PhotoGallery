@@ -8,7 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
+
+import java.util.ArrayList;
 
 /**
  * Created by RJ-HXW on 2017/11/2.
@@ -17,6 +20,7 @@ import android.widget.GridView;
 public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = PhotoGalleryFragment.class.getSimpleName();
     GridView mGridView;
+    ArrayList<GalleryItem> mItems;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,16 +36,29 @@ public class PhotoGalleryFragment extends Fragment {
 
         mGridView = ((GridView) view.findViewById(R.id.gridView));
 
+        setupAdapter();
+
 
         return view;
     }
 
+    void setupAdapter() {
+        if (getActivity() == null || mGridView == null) {
+            return;
+        }
+        if (mItems != null) {
+            mGridView.setAdapter(new ArrayAdapter<GalleryItem>(getActivity(), android.R.layout.simple_gallery_item, mItems));
+        } else {
+            mGridView.setAdapter(null);
+        }
+    }
+
     /*AsyncTask后台工具*/
 
-    private class FetchItemsTask extends AsyncTask<Void, Void, Void> {
+    private class FetchItemsTask extends AsyncTask<Void, Void, ArrayList<GalleryItem>> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected ArrayList<GalleryItem> doInBackground(Void... voids) {
             Log.e(TAG, "doInBackground:");
 //            try {
 //                String result = new FlickrFetchr().getUrl("https://api.flickr.com/services/rest");
@@ -49,9 +66,15 @@ public class PhotoGalleryFragment extends Fragment {
 //            } catch (IOException e) {
 //                Log.e(TAG, "Failed to fetch URL:", e);
 //            }
-            new FlickrFetchr().fetchItems();
-            return null;
+            return new FlickrFetchr(getContext()).fetchItems();
         }
+
+        @Override
+        protected void onPostExecute(ArrayList<GalleryItem> items) {
+            mItems = items;
+            setupAdapter();
+        }
+
     }
 
 }

@@ -22,4 +22,5 @@ Android权威编程指南第26章
 
     `<uses-permission android:name="android.permission.INTERNET"/>`
 3. AsyncTask后台线程运行
-4.
+4. XmlPullParser读取xml数据流中的数据
+5. AsyncTask回主线程更新ui界面
