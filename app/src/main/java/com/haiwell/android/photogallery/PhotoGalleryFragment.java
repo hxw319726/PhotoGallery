@@ -9,6 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -33,6 +36,7 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        setHasOptionsMenu(true);
         new FetchItemsTask().execute();
 
         mThumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
@@ -58,9 +62,6 @@ public class PhotoGalleryFragment extends Fragment {
         mGridView = ((GridView) view.findViewById(R.id.gridView));
 
         setupAdapter();
-
-
-
         return view;
     }
 
@@ -76,6 +77,25 @@ public class PhotoGalleryFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mThumbnailDownloader.clearQueue();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_photo_gallery, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_search:
+                getActivity().onSearchRequested();
+                return true;
+            case R.id.menu_item_clear:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     void setupAdapter() {
@@ -103,7 +123,12 @@ public class PhotoGalleryFragment extends Fragment {
 //            } catch (IOException e) {
 //                Log.e(TAG, "Failed to fetch URL:", e);
 //            }
-            return new FlickrFetchr(getContext()).fetchItems();
+            String query = "android";
+            if (query != null) {
+                return new FlickrFetchr(getContext()).search(query);
+            } else {
+                return new FlickrFetchr(getContext()).fetchItems();
+            }
         }
 
         @Override

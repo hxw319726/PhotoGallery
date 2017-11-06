@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rsp stat="ok">
+<photos page="1" pages="10" perpage="100" total="1000">
+	<photo id="24278286628" owner="140229357@N02" secret="81017c407a" server="4580" farm="5" title="Geile Urin-Zwangsbeatmung" ispublic="1" isfriend="0" isfamily="0" url_s="https://farm5.staticflickr.com/4580/24278286628_81017c407a_m.jpg" height_s="240" width_s="160" />
+	<photo id="24278292428" owner="76576113@N00" secret="5699a4fb17" server="4463" farm="5" title="DSC04118.jpg" ispublic="1" isfriend="0" isfamily="0" url_s="https://farm5.staticflickr.com/4463/24278292428_5699a4fb17_m.jpg" height_s="160" width_s="240" />
+</photos>
+</rsp>

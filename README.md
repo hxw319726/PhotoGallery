@@ -27,3 +27,5 @@ Android权威编程指南第26章
 6. 消息队列:消息循环由一个线程和一个looper组成，looper对象管理着线程和消息队列。
 7. HandlerThread.onLooperPrepared()方法的调用发生在Looper第一次检查消息队列之前
 8. setImageBitmap()设置图片之前，先调用Fragment.isVisible()检查方法，保证不会设置到无效的ImageView视图上
+9. 添加search菜单的回调onSearchRequested()方法
+10. 配置activity支持搜索：首先是独立的xml（searchable）配置，在AndroidManifest配置
