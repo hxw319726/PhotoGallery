@@ -1,8 +1,9 @@
 package com.haiwell.android.photogallery;
 
-import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,8 +23,10 @@ import java.util.ArrayList;
 
 public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = PhotoGalleryFragment.class.getSimpleName();
+
     GridView mGridView;
     ArrayList<GalleryItem> mItems;
+    ThumbnailDownloader<ImageView> mThumbnailDownloader;
 
 
     @Override
@@ -31,6 +34,20 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemsTask().execute();
+
+        mThumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
+        mThumbnailDownloader.setListener(new ThumbnailDownloader.Listener<ImageView>() {
+            @Override
+            public void onThumbnailDownloaded(ImageView imageView, Bitmap thumbnail) {
+                if (isVisible()) {
+                    imageView.setImageBitmap(thumbnail);
+                }
+            }
+        });
+        mThumbnailDownloader.start();
+        mThumbnailDownloader.getLooper();
+        Log.i(TAG, "Background thread started");
+
     }
 
     @Nullable
@@ -45,6 +62,20 @@ public class PhotoGalleryFragment extends Fragment {
 
 
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThumbnailDownloader.quit();
+        Log.i(TAG, "Background thread destroy");
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mThumbnailDownloader.clearQueue();
     }
 
     void setupAdapter() {
@@ -96,6 +127,8 @@ public class PhotoGalleryFragment extends Fragment {
             }
             ImageView imageView = ((ImageView) convertView.findViewById(R.id.gallery_item_imageView));
             imageView.setImageResource(R.drawable.brian_up_close);
+            GalleryItem item = getItem(position);
+            mThumbnailDownloader.queueThumbnail(imageView, item.getUrl());
             return convertView;
         }
     }

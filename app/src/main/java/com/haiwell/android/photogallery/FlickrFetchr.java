@@ -1,17 +1,13 @@
 package com.haiwell.android.photogallery;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
-import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -35,6 +31,10 @@ public class FlickrFetchr {
     private static final String XML_PHOTO = "photo";
 
     private Context mContext;
+
+    public FlickrFetchr() {
+
+    }
 
     public FlickrFetchr(Context context) {
         mContext = context;
