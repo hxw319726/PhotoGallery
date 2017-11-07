@@ -1,9 +1,13 @@
 package com.haiwell.android.photogallery;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -35,9 +39,15 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        new FetchItemsTask().execute();
+        updateItems();
+
+        //定时执行服务
+//        Intent i = new Intent(getActivity(), PollService.class);
+//        getActivity().startService(i);
+//        PollService.setServiceAlarm(getActivity(), true);
 
         mThumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
         mThumbnailDownloader.setListener(new ThumbnailDownloader.Listener<ImageView>() {
@@ -52,6 +62,10 @@ public class PhotoGalleryFragment extends Fragment {
         mThumbnailDownloader.getLooper();
         Log.i(TAG, "Background thread started");
 
+    }
+
+    public void updateItems() {
+        new FetchItemsTask().execute();
     }
 
     @Nullable
@@ -92,9 +106,33 @@ public class PhotoGalleryFragment extends Fragment {
                 getActivity().onSearchRequested();
                 return true;
             case R.id.menu_item_clear:
+                PreferenceManager.getDefaultSharedPreferences(getActivity())
+                        .edit()
+                        .putString(FlickrFetchr.PREF_SEARCH_QUERY, null)
+                        .commit();
+                updateItems();
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    getActivity().invalidateOptionsMenu();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+        if (PollService.isServiceAlarmOn(getActivity())) {
+            toggleItem.setTitle(R.string.stop_polling);
+        } else {
+            toggleItem.setTitle(R.string.start_polling);
         }
     }
 
@@ -117,13 +155,13 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         protected ArrayList<GalleryItem> doInBackground(Void... voids) {
             Log.e(TAG, "doInBackground:");
-//            try {
-//                String result = new FlickrFetchr().getUrl("https://api.flickr.com/services/rest");
-//                Log.i(TAG, "Fetched contents of URL:" + result);
-//            } catch (IOException e) {
-//                Log.e(TAG, "Failed to fetch URL:", e);
-//            }
-            String query = "android";
+            Activity activity = getActivity();
+            if (activity == null) {
+                return new ArrayList<GalleryItem>();
+            }
+
+            String query = PreferenceManager.getDefaultSharedPreferences(activity)
+                    .getString(FlickrFetchr.PREF_SEARCH_QUERY, null);
             if (query != null) {
                 return new FlickrFetchr(getContext()).search(query);
             } else {
